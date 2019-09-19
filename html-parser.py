@@ -61,4 +61,14 @@ for w in nouns:
         w = porter.stem(w)
         filtered_sentence.append(w)
         
-print(filtered_sentence)
+word_list = {}
+
+for i in range(len(filtered_sentence)):
+    if not filtered_sentence[i] in word_list.keys():
+        word_list[filtered_sentence[i]] = 1
+    else:
+        word_list[filtered_sentence[i]] += 1 
+
+        
+        
+print(word_list)

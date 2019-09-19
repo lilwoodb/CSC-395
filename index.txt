@@ -1,0 +1,9 @@
+http://hello.com
+hi 3
+lol 1
+http://google.com
+you 4
+we 1
+http://iwannadie.lol
+lol 9
+kmp 2
