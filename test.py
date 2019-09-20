@@ -12,16 +12,46 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import wordnet as wn
 from bs4 import BeautifulSoup
-stop_words = set(stopwords.words('english'))
-#from nltk.tokenize import word_tokenize
+import random
+from urllib.request import urlopen
 
-porter = PorterStemmer()
 #page = requests.get("https://en.wikipedia.org/wiki/Magliocca")
 
-def ourCrawler(url):
+def getLinks(url):
+    html_page = urlopen(url)
+    soup = BeautifulSoup(html_page, 'html.parser')
+    links = []
+
+    for link in soup.findAll('a'):
+        temp = str(link.get('href'))
+        search = '/wiki/'
+        if temp.startswith(search):
+            http = 'https://en.wikipedia.org'
+            new_url = http+temp
+            if new_url not in links:
+                links.append(new_url)
+    #print(links)
     
+    new_links = []
+    new_urls = []
+    n = 0
+
+    # if each seed begets 20 links, the min num of possible duplicates is 100
+    while not n == 20:
+        rand_num = random.randrange(0, len(links), 1)
+        rand_url = links[rand_num]
+        new_urls.append(rand_url)
+        n += 1
+    
+    return new_urls
+
+
+def ourCrawler(url):
+    stop_words = set(stopwords.words('english'))
     page = requests.get(url)
-    print(page)
+    porter = PorterStemmer()
+
+    #print(page)
     soup = BeautifulSoup(page.content, 'html.parser')
     page.status_code
     #master_dict = PyDictionary()
@@ -72,19 +102,77 @@ def ourCrawler(url):
         else:
             word_list[filtered_sentence[i]] += 1 
 
-        
-    #print(word_list)
+    #pages_crawled += 1
+
     return word_list
 
+def writeIndex(index):
+    f = open("index.txt", "w+")
+
+    for x in index:
+        f.write(x)
+        f.write('\n')
+        list_of_tuples = index[x]
+
+        for y in list_of_tuples:
+            f.write(str(y[0]) + " " + str(y[1])+'\n')
+    f.close()
+    return
+
+def writeURL(li):
+    f = open("urlDoc.txt", "w+")
+    j = 0
+    print(len(li))
+    while j < len(li):
+        f.write(str(j))
+        f.write('\n')
+        f.write(li[j] + '\n')
+        j += 1 
+    f.close()
+    return
 
 def main():
-    seedList = ["https://en.wikipedia.org/wiki/Magliocca", "https://en.wikipedia.org/wiki/Puppy"]
+    
+    pages_crawled = 0
 
+    seedList = ["https://en.wikipedia.org/wiki/Magliocca",
+                "http://en.wikipedia.org/wiki/Puppy",
+                "https://en.wikipedia.org/wiki/Samoa_Breweries",
+                "https://en.wikipedia.org/wiki/FC_Karlivka",
+                "https://en.wikipedia.org/wiki/Raam_Punjabi",
+                "https://en.wikipedia.org/wiki/Martian_Heartache",
+                "https://en.wikipedia.org/wiki/Robert_C._Helmer",
+                "https://en.wikipedia.org/wiki/Ivo_den_Bieman",
+                "https://en.wikipedia.org/wiki/Editora_Fundamento",
+                "https://en.wikipedia.org/wiki/Thomas_Mesnier"]
+    
+    new_links = []
+
+    '''
+    while pages_crawled < 15:
+        for i in seedList:
+            temp_links = getLinks(i)
+            for j in range(len(temp_links)):
+                if temp_links[j] not in new_links:
+                    new_links.append(temp_links[j])
+        seedList = new_links
+        pages_crawled = len(new_links)
+    '''
+
+    for i in seedList:
+        temp_links = getLinks(i)
+        for j in range(len(temp_links)):
+            if temp_links[j] not in new_links:
+                new_links.append(temp_links[j])
+        seedList = new_links
+                
+   # print(new_links)
+        
     inverted_index = {}
+    
     doc_id = 0
-    for s in seedList:
+    for s in new_links:
         freq_dic = ourCrawler(s)
-       # print(type(freq_dic))
         for k in freq_dic.keys():
             v = freq_dic[k]
             if k not in inverted_index.keys():
@@ -93,12 +181,13 @@ def main():
                 inverted_index[k].append((doc_id, v))
         doc_id += 1
 
-    sorted(inverted_index.keys())
-
-    print(inverted_index)
-
-
-
+    # sorted(inverted_index.keys())
+   
+    # print(inverted_index)
+   
+    writeURL(new_links)
+    
+    writeIndex(inverted_index)
 
 if __name__== "__main__":
   main()
