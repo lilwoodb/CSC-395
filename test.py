@@ -37,7 +37,7 @@ def getLinks(url):
     n = 0
 
     # if each seed begets 20 links, the min num of possible duplicates is 100
-    while not n == 20:
+    while not n == 5:
         rand_num = random.randrange(0, len(links), 1)
         rand_url = links[rand_num]
         new_urls.append(rand_url)
@@ -131,10 +131,44 @@ def writeURL(li):
     f.close()
     return
 
+def searchDoc(search_term):
+    # search_term is a string, can be either of the query terms
+    f = open("index.txt", "r+")
+
+    temp = f.readline()
+
+    while temp != search_term:
+        temp = f.readline()
+
+    digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+    searchDict = {}
+
+    # temp starts keeping track of numbers now
+    temp = f.readline()
+
+    # add document IDs and word occurrences to searchDict as (k, v) pairs
+    #while temp.startswith("0") or temp.startswith("1") or temp.startswith("2") or temp.startswith("3") or temp.startswith("4") or temp.startswith("5") or temp.startswith("6") or temp.startswith("7") or temp.startswith("8") or temp.startswith("9"):
+    while temp[:1] in digits:
+        kv = temp.split()
+        searchDict[kv[0]] = kv[1]
+        temp = f.readline
+    # cast to ints?
+    
+    f.close()
+
+    for keys,values in searchDict.items():
+        print(keys)
+        print(values)
+
+    # returns dict of document IDs and word occurrences for search_term
+    return searchDict
+
 def main():
     
     pages_crawled = 0
 
+    '''
     seedList = ["https://en.wikipedia.org/wiki/Magliocca",
                 "http://en.wikipedia.org/wiki/Puppy",
                 "https://en.wikipedia.org/wiki/Samoa_Breweries",
@@ -145,8 +179,13 @@ def main():
                 "https://en.wikipedia.org/wiki/Ivo_den_Bieman",
                 "https://en.wikipedia.org/wiki/Editora_Fundamento",
                 "https://en.wikipedia.org/wiki/Thomas_Mesnier"]
+    '''
+    seedList = ["https://en.wikipedia.org/wiki/Magliocca",
+                "http://en.wikipedia.org/wiki/Puppy"]
     
     new_links = []
+
+    keywords = ["and","not","or"]
 
     '''
     while pages_crawled < 15:
@@ -178,9 +217,9 @@ def main():
             if k not in inverted_index.keys():
                 inverted_index[k] = [(doc_id, v)]
             else:
-                inverted_index[k].append((doc_id, v))
+                inverted_index[k].append((doc_id, v))        
         doc_id += 1
-
+     
     # sorted(inverted_index.keys())
    
     # print(inverted_index)
@@ -188,6 +227,36 @@ def main():
     writeURL(new_links)
     
     writeIndex(inverted_index)
+
+    f = open("index.txt", "r+")
+    tmp = f.readline()
+    f.close()
+    
+    
+    searchDoc(tmp)
+
+    # query process
+'''
+    while True:
+        query = input("Enter search query: ")
+        query = query.lower()
+
+        tokenizer = RegexpTokenizer(r'\w+')
+        terms = tokenizer.tokenize(query)
+
+        new_query = []
+
+        for w in terms:
+            w = porter.stem(w)
+            new_query.append(w)
+
+        boolTerm = new_query[1]
+        search1 = new_query[0]
+        search2 = new_query[2]
+
+'''
+        # if boolTerm == 'and' (i.e. base case)
+        
 
 if __name__== "__main__":
   main()
