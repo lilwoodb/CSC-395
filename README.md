@@ -1,4 +1,4 @@
-# CSC-395
+# CSC-395 Programming Assignment 1: Steffie Ochoa and Lilya Woodburn
 
 ## General Notes
   * Program only crawls pages within the Wikipedia domain.
